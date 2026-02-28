@@ -1,0 +1,21 @@
+topics:
+  hypertension:
+    hit_keywords: ["高血压", "血压偏高", "收缩压", "舒张压"]
+    policy_types: ["preexisting_definition", "exclusion", "underwriting_disclosure"]
+    red_conditions:
+      - "diagnosed == true"
+      - "long_term_medication == true"
+    yellow_conditions:
+      - "date_missing == true"
+      - "diagnosed == false and abnormal_index == true"
+
+  diabetes:
+    hit_keywords: ["血糖", "糖尿病", "糖化血红蛋白", "HbA1c"]
+    policy_types: ["preexisting_definition", "exclusion", "specific_disease_definition"]
+    red_conditions:
+      - "diagnosed == true"
+      - "long_term_medication == true"
+    yellow_conditions:
+      - "borderline_values == true"
+
+  # TODO: 添加其他 8 个主题配置
