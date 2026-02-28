@@ -115,6 +115,7 @@ Closes #123
 ### 7. Code Review
 
 - 至少需要 1 位 Maintainer 审核通过
+- 高风险改动（数据库迁移、鉴权、删除逻辑、跨模块重构）需 2 位 Reviewer 审核通过
 - 解决所有 Review 意见后方可合并
 - 保持 PR 小而聚焦，便于审核
 

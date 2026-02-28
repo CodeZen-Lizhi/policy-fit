@@ -1,0 +1,12 @@
+{
+  "PFIT-1001": "Invalid request parameters",
+  "PFIT-1002": "Please sign in again",
+  "PFIT-1003": "Forbidden",
+  "PFIT-1005": "System busy, please retry later",
+  "PFIT-2001": "Only PDF files are supported",
+  "PFIT-2002": "File exceeds 30MB size limit",
+  "PFIT-5001": "Task not found or deleted",
+  "PFIT-5002": "Task status does not allow this operation",
+  "PFIT-5003": "Upload both report and policy before running analysis",
+  "PFIT-5004": "Rule version not found"
+}

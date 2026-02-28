@@ -1,0 +1,14 @@
+[
+  {
+    "policy_id": "policy-1",
+    "policy_text": "第1条 既往症定义：投保前已患疾病不在赔付范围。\n第2条 等待期：合同生效后90天内不赔。",
+    "query": "既往症是否赔付",
+    "expected_keyword": "既往症"
+  },
+  {
+    "policy_id": "policy-2",
+    "policy_text": "第1条 免责条款：酒驾导致事故不赔。\n第2条 不可抗辩：满2年后受不可抗辩约束。",
+    "query": "酒驾事故赔不赔",
+    "expected_keyword": "酒驾"
+  }
+]

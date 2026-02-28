@@ -12,6 +12,9 @@
 - ❓ **追问问题清单**：生成用户需要补充确认的关键信息
 - 🎯 **行动建议**：提供下一步操作指引
 - 🔒 **隐私保护**：数据加密存储，支持一键删除
+- 🧠 **RAG 条款定位**：按条款结构切片并支持向量召回重排
+- 🌍 **多语言支持**：前端中英文切换，导出报告支持多语言模板
+- 🖼️ **OCR 扩展能力**：提供 Python `document-parser` 服务接口
 
 ## 🚀 快速开始
 
@@ -49,7 +52,11 @@ make run-api
 make run-worker
 ```
 
-访问 http://localhost:8080
+访问:
+- API: http://localhost:8080
+- 健康探针: http://localhost:8080/health
+- 就绪探针: http://localhost:8080/ready
+- 指标快照: http://localhost:8080/metrics
 
 ### 手动安装
 
@@ -65,12 +72,32 @@ make build
 ./bin/worker
 ```
 
+### 前端本地运行（Next.js）
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+访问 http://localhost:3001
+
+### 鉴权说明（JWT）
+
+- `/api/v1/*` 默认启用 Bearer Token 鉴权
+- Token payload 需包含 `user_id`
+- 请求会自动注入 `X-Request-ID` 并在响应体返回 `request_id`
+
 ## 📖 文档
 
 - [产品需求文档 (PRD)](./PRD-保单避坑雷达-v1.md)
 - [API 文档](./docs/api.md)
 - [部署指南](./docs/deployment.md)
 - [迁移回滚指南](./docs/migration-rollback.md)
+- [错误码文档](./docs/error-codes.md)
+- [架构文档](./docs/architecture.md)
+- [运行手册](./docs/runbooks/operations.md)
+- [用户协议草案](./docs/compliance-user-agreement.md)
 - [贡献指南](./CONTRIBUTING.md)
 
 ## 🏗️ 架构

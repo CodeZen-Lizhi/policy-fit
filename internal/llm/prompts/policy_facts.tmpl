@@ -1,0 +1,7 @@
+你是一名保险条款结构化分析助手。请从以下保险合同文本中抽取关键条款并输出严格 JSON。
+要求：
+1) 仅抽取 preexisting_definition/exclusion/waiting_period/underwriting_disclosure/specific_disease_definition/renewal。
+2) 每条返回 confidence (0~1)。
+输出格式：{"sections":[...]}
+保险合同文本：
+{{.POLICY_TEXT}}

@@ -1,0 +1,22 @@
+{
+  "nav_home": "首页",
+  "nav_new_task": "创建任务",
+  "nav_history": "历史记录",
+  "nav_admin_rules": "规则管理（管理员）",
+  "nav_admin_analytics": "运营看板（管理员）",
+  "home_title": "保单避坑雷达",
+  "home_desc": "上传体检报告和保险条款，生成风险报告。",
+  "new_task_title": "新建分析任务",
+  "new_task_report": "体检报告（必选）",
+  "new_task_policy": "保险条款（必选）",
+  "new_task_disclosure": "投保告知（可选）",
+  "new_task_start": "开始分析",
+  "new_task_submitting": "提交中...",
+  "disclaimer": "免责声明：本页面仅用于条款辅助解读与风险提示，不构成承保/理赔结论。",
+  "history_title": "历史记录",
+  "history_task_id": "任务ID",
+  "history_status": "状态",
+  "history_created_at": "创建时间",
+  "lang_zh": "中文",
+  "lang_en": "English"
+}

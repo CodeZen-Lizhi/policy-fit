@@ -42,3 +42,17 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+
+# Frontend artifacts
+web/node_modules/
+web/.next/
+web/test-results/
+
+# Local caches
+.cache/
+.pycache/
+
+# Local tooling artifacts
+.pycache/
+.serena/
+coverage.html

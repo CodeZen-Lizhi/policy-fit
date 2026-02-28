@@ -1,0 +1,7 @@
+policy_types:
+  - preexisting_definition
+  - exclusion
+  - waiting_period
+  - underwriting_disclosure
+  - specific_disease_definition
+  - renewal

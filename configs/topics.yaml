@@ -2,20 +2,99 @@ topics:
   hypertension:
     hit_keywords: ["高血压", "血压偏高", "收缩压", "舒张压"]
     policy_types: ["preexisting_definition", "exclusion", "underwriting_disclosure"]
-    red_conditions:
-      - "diagnosed == true"
-      - "long_term_medication == true"
-    yellow_conditions:
-      - "date_missing == true"
-      - "diagnosed == false and abnormal_index == true"
+    questions:
+      - "是否已被医生明确诊断为高血压？"
+      - "是否正在长期服用降压药物？"
+    actions:
+      - "补充投保告知截图"
+      - "联系保险公司核保确认"
 
   diabetes:
     hit_keywords: ["血糖", "糖尿病", "糖化血红蛋白", "HbA1c"]
-    policy_types: ["preexisting_definition", "exclusion", "specific_disease_definition"]
-    red_conditions:
-      - "diagnosed == true"
-      - "long_term_medication == true"
-    yellow_conditions:
-      - "borderline_values == true"
+    policy_types: ["preexisting_definition", "exclusion", "specific_disease_definition", "underwriting_disclosure"]
+    questions:
+      - "是否已确诊糖尿病？"
+      - "是否正在服用降糖药物？"
+    actions:
+      - "补充近期血糖检查结果"
+      - "确认条款中特定疾病定义"
 
-  # TODO: 添加其他 8 个主题配置
+  dyslipidemia:
+    hit_keywords: ["血脂", "胆固醇", "甘油三酯", "LDL", "HDL"]
+    policy_types: ["preexisting_definition", "exclusion", "underwriting_disclosure"]
+    questions:
+      - "是否已确诊高脂血症？"
+      - "是否正在服用调脂药物？"
+    actions:
+      - "补充血脂复查报告"
+      - "核对告知问卷是否已披露"
+
+  obesity:
+    hit_keywords: ["BMI", "肥胖", "超重", "体重指数"]
+    policy_types: ["underwriting_disclosure", "exclusion"]
+    questions:
+      - "是否存在体重快速波动？"
+      - "是否合并代谢类疾病？"
+    actions:
+      - "补充近期体检记录"
+      - "确认是否触发加费或除外"
+
+  fatty_liver:
+    hit_keywords: ["脂肪肝", "ALT", "AST", "肝功能异常"]
+    policy_types: ["preexisting_definition", "exclusion", "underwriting_disclosure"]
+    questions:
+      - "是否有明确肝病诊断？"
+      - "是否存在长期饮酒或乙肝病史？"
+    actions:
+      - "补充肝功能复查结果"
+      - "核对条款中肝病免责描述"
+
+  thyroid_nodule:
+    hit_keywords: ["甲状腺结节", "TI-RADS", "甲状腺占位"]
+    policy_types: ["preexisting_definition", "exclusion", "specific_disease_definition"]
+    questions:
+      - "TI-RADS 分级是多少？"
+      - "是否做过穿刺活检？"
+    actions:
+      - "补充超声报告与分级信息"
+      - "咨询核保是否除外甲状腺疾病"
+
+  pulmonary_nodule:
+    hit_keywords: ["肺结节", "磨玻璃", "GGO", "肺部阴影"]
+    policy_types: ["preexisting_definition", "exclusion", "specific_disease_definition"]
+    questions:
+      - "结节大小及性质是什么？"
+      - "是否完成随访复查？"
+    actions:
+      - "补充胸部影像与随访记录"
+      - "核对特定疾病定义条款"
+
+  ecg_abnormal:
+    hit_keywords: ["心电图异常", "心律不齐", "房颤", "ST 段改变"]
+    policy_types: ["preexisting_definition", "exclusion", "specific_disease_definition", "underwriting_disclosure"]
+    questions:
+      - "是否有明确心律失常诊断？"
+      - "是否服用相关药物？"
+    actions:
+      - "补充动态心电图或超声检查"
+      - "核对心脏相关免责条款"
+
+  hyperuricemia:
+    hit_keywords: ["尿酸", "痛风", "高尿酸血症"]
+    policy_types: ["preexisting_definition", "exclusion", "underwriting_disclosure"]
+    questions:
+      - "是否有痛风发作史？"
+      - "是否长期服用降尿酸药物？"
+    actions:
+      - "补充尿酸复查和用药记录"
+      - "核对既往症定义与免责描述"
+
+  renal_abnormal:
+    hit_keywords: ["肾功能异常", "肌酐", "蛋白尿", "eGFR"]
+    policy_types: ["preexisting_definition", "exclusion", "underwriting_disclosure"]
+    questions:
+      - "是否确诊慢性肾病？"
+      - "是否存在持续蛋白尿？"
+    actions:
+      - "补充肾功能复查结果"
+      - "核对条款中既往肾病限制"

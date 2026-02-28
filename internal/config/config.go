@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -70,6 +71,7 @@ type ParserConfig struct {
 type SecurityConfig struct {
 	JWTSecret         string
 	DataRetentionDays int
+	AdminUserIDs      []int64
 }
 
 type LogConfig struct {
@@ -159,6 +161,7 @@ func loadFromFile(path string, appEnv string, useEnvOverride bool) (*Config, err
 		Security: SecurityConfig{
 			JWTSecret:         v.GetString("JWT_SECRET"),
 			DataRetentionDays: v.GetInt("DATA_RETENTION_DAYS"),
+			AdminUserIDs:      parseInt64List(v.GetString("ADMIN_USER_IDS")),
 		},
 		Log: LogConfig{
 			Level:  v.GetString("LOG_LEVEL"),
@@ -329,4 +332,28 @@ func resolveConfigFile(appEnv string) (string, error) {
 func exists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func parseInt64List(raw string) []int64 {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	values := make([]int64, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		v, err := strconv.ParseInt(part, 10, 64)
+		if err != nil || v <= 0 {
+			continue
+		}
+		values = append(values, v)
+	}
+	if len(values) == 0 {
+		return nil
+	}
+	return values
 }

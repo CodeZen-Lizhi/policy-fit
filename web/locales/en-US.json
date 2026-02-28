@@ -1,0 +1,22 @@
+{
+  "nav_home": "Home",
+  "nav_new_task": "New Task",
+  "nav_history": "History",
+  "nav_admin_rules": "Rule Admin",
+  "nav_admin_analytics": "Analytics Dashboard",
+  "home_title": "Policy Fit Radar",
+  "home_desc": "Upload health report and policy clauses to generate risk analysis.",
+  "new_task_title": "Create Analysis Task",
+  "new_task_report": "Health Report (Required)",
+  "new_task_policy": "Policy Clause (Required)",
+  "new_task_disclosure": "Disclosure (Optional)",
+  "new_task_start": "Start Analysis",
+  "new_task_submitting": "Submitting...",
+  "disclaimer": "Disclaimer: This page provides policy interpretation hints only and is not a claim or underwriting decision.",
+  "history_title": "History",
+  "history_task_id": "Task ID",
+  "history_status": "Status",
+  "history_created_at": "Created At",
+  "lang_zh": "中文",
+  "lang_en": "English"
+}

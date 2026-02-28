@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,12 +21,13 @@ func Logger() gin.HandlerFunc {
 		status := c.Writer.Status()
 
 		logger.Info("HTTP Request",
+			"request_id", GetRequestID(c),
 			"method", c.Request.Method,
 			"path", path,
-			"query", query,
+			"query", sanitizeQuery(query),
 			"status", status,
 			"latency", latency.String(),
-			"ip", c.ClientIP(),
+			"ip", maskIP(c.ClientIP()),
 		)
 	}
 }
@@ -45,4 +47,29 @@ func CORS() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func sanitizeQuery(query string) string {
+	if query == "" {
+		return ""
+	}
+
+	lowered := strings.ToLower(query)
+	if strings.Contains(lowered, "token=") ||
+		strings.Contains(lowered, "authorization=") ||
+		strings.Contains(lowered, "password=") {
+		return "[REDACTED]"
+	}
+	if len(query) > 120 {
+		return query[:120] + "..."
+	}
+	return query
+}
+
+func maskIP(ip string) string {
+	if strings.Count(ip, ".") == 3 {
+		parts := strings.Split(ip, ".")
+		return parts[0] + "." + parts[1] + ".*.*"
+	}
+	return ip
 }
