@@ -36,6 +36,9 @@ docker-compose up -d
 cp .env.example .env
 # 编辑 .env 填入 LLM API Key
 
+# 校验配置
+make env-check
+
 # 运行数据库迁移
 make migrate-up
 
@@ -67,6 +70,7 @@ make build
 - [产品需求文档 (PRD)](./PRD-保单避坑雷达-v1.md)
 - [API 文档](./docs/api.md)
 - [部署指南](./docs/deployment.md)
+- [迁移回滚指南](./docs/migration-rollback.md)
 - [贡献指南](./CONTRIBUTING.md)
 
 ## 🏗️ 架构
@@ -105,6 +109,16 @@ make build
 - **文档解析**: pdftotext
 - **日志**: Zap
 - **配置管理**: Viper
+
+## ⚙️ 配置策略
+
+- 配置文件按 `APP_ENV` 分层加载，优先级如下：
+1. `.env.<APP_ENV>.local`
+2. `.env.<APP_ENV>`
+3. `.env`
+- 默认 `APP_ENV=dev`，可设置为 `test` 或 `prod`。
+- 使用 `make env-check` 在启动前做必填项校验。
+- MVP 阶段不支持配置热加载，修改配置后需要重启服务生效。
 
 ## ⚠️ 免责声明
 

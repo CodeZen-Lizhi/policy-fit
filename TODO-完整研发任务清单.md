@@ -38,23 +38,23 @@
 
 ### 2.1 环境与配置
 
-- [ ] T-0201 补齐 `.env.example` 中所有必需变量说明（含默认值与用途）
-- [ ] T-0202 增加环境变量校验器（启动时缺失必填项直接失败）
-- [ ] T-0203 区分 `dev/test/prod` 配置加载策略
-- [ ] T-0204 配置热加载策略确认（MVP 可先不热加载，但要写明）
-- [ ] T-0205 增加 `make env-check` 命令
+- [x] T-0201 补齐 `.env.example` 中所有必需变量说明（含默认值与用途）
+- [x] T-0202 增加环境变量校验器（启动时缺失必填项直接失败）
+- [x] T-0203 区分 `dev/test/prod` 配置加载策略
+- [x] T-0204 配置热加载策略确认（MVP 可先不热加载，但要写明）
+- [x] T-0205 增加 `make env-check` 命令
 
 ### 2.2 数据库与迁移
 
-- [ ] T-0211 将 `cmd/migrate` 中 SQL 提取为版本化迁移文件（`internal/migrations`）
-- [ ] T-0212 为 `analysis_task.updated_at` 增加自动更新时间机制
-- [ ] T-0213 为 `document.doc_type` 增加枚举约束
-- [ ] T-0214 为 `risk_finding.level` 增加枚举约束
-- [ ] T-0215 增加审计日志表 `audit_log`
-- [ ] T-0216 增加幂等字段：`task.request_id`
-- [ ] T-0217 增加索引：`document(parse_status)`、`risk_finding(topic)`
-- [ ] T-0218 完成迁移回滚可用性验证（up/down 各一次）
-- [ ] T-0219 补充迁移失败回滚说明文档
+- [x] T-0211 将 `cmd/migrate` 中 SQL 提取为版本化迁移文件（`internal/migrations`）
+- [x] T-0212 为 `analysis_task.updated_at` 增加自动更新时间机制
+- [x] T-0213 为 `document.doc_type` 增加枚举约束
+- [x] T-0214 为 `risk_finding.level` 增加枚举约束
+- [x] T-0215 增加审计日志表 `audit_log`
+- [x] T-0216 增加幂等字段：`task.request_id`
+- [x] T-0217 增加索引：`document(parse_status)`、`risk_finding(topic)`
+- [ ] T-0218 完成迁移回滚可用性验证（up/down 各一次，阻塞：当前环境无法下载 Go 依赖）
+- [x] T-0219 补充迁移失败回滚说明文档
 
 ### 2.3 Repository 层
 
@@ -359,4 +359,3 @@
 - [ ] DOD-05 文档已更新（必要时）
 - [ ] DOD-06 变更已记录到 `CHANGELOG.md`
 - [ ] DOD-07 风险与回滚点已说明
-

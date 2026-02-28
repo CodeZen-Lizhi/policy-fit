@@ -1,21 +1,27 @@
 package config
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	Redis    RedisConfig
-	Storage  StorageConfig
-	LLM      LLMConfig
-	Parser   ParserConfig
-	Security SecurityConfig
-	Log      LogConfig
-	Worker   WorkerConfig
+	AppEnv     string
+	ConfigFile string
+	Server     ServerConfig
+	Database   DatabaseConfig
+	Redis      RedisConfig
+	Storage    StorageConfig
+	LLM        LLMConfig
+	Parser     ParserConfig
+	Security   SecurityConfig
+	Log        LogConfig
+	Worker     WorkerConfig
 }
 
 type ServerConfig struct {
@@ -57,8 +63,8 @@ type LLMConfig struct {
 }
 
 type ParserConfig struct {
-	PDFParser         string
-	PythonServiceURL  string
+	PDFParser        string
+	PythonServiceURL string
 }
 
 type SecurityConfig struct {
@@ -76,67 +82,134 @@ type WorkerConfig struct {
 }
 
 func Load() (*Config, error) {
-	viper.SetConfigFile(".env")
-	viper.AutomaticEnv()
+	appEnv := detectAppEnv()
+	configFile, err := resolveConfigFile(appEnv)
+	if err != nil {
+		return nil, err
+	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("failed to read config: %w", err)
+	return loadFromFile(configFile, appEnv, true)
+}
+
+func ValidateEnvFile(path string) error {
+	if _, err := loadFromFile(path, "", false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func loadFromFile(path string, appEnv string, useEnvOverride bool) (*Config, error) {
+	v := viper.New()
+	v.SetConfigFile(path)
+	if useEnvOverride {
+		v.AutomaticEnv()
+	}
+
+	if err := v.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("failed to read config file %s: %w", path, err)
+	}
+
+	if appEnv == "" {
+		appEnv = strings.TrimSpace(strings.ToLower(v.GetString("APP_ENV")))
+	}
+	if appEnv == "" {
+		appEnv = "dev"
 	}
 
 	cfg := &Config{
+		AppEnv:     appEnv,
+		ConfigFile: path,
 		Server: ServerConfig{
-			Port: viper.GetInt("API_PORT"),
-			Mode: viper.GetString("GIN_MODE"),
+			Port: v.GetInt("API_PORT"),
+			Mode: v.GetString("GIN_MODE"),
 		},
 		Database: DatabaseConfig{
-			Host:     viper.GetString("DB_HOST"),
-			Port:     viper.GetInt("DB_PORT"),
-			User:     viper.GetString("DB_USER"),
-			Password: viper.GetString("DB_PASSWORD"),
-			DBName:   viper.GetString("DB_NAME"),
-			SSLMode:  viper.GetString("DB_SSLMODE"),
+			Host:     v.GetString("DB_HOST"),
+			Port:     v.GetInt("DB_PORT"),
+			User:     v.GetString("DB_USER"),
+			Password: v.GetString("DB_PASSWORD"),
+			DBName:   v.GetString("DB_NAME"),
+			SSLMode:  v.GetString("DB_SSLMODE"),
 		},
 		Redis: RedisConfig{
-			Host:     viper.GetString("REDIS_HOST"),
-			Port:     viper.GetInt("REDIS_PORT"),
-			Password: viper.GetString("REDIS_PASSWORD"),
-			DB:       viper.GetInt("REDIS_DB"),
+			Host:     v.GetString("REDIS_HOST"),
+			Port:     v.GetInt("REDIS_PORT"),
+			Password: v.GetString("REDIS_PASSWORD"),
+			DB:       v.GetInt("REDIS_DB"),
 		},
 		Storage: StorageConfig{
-			Type:      viper.GetString("STORAGE_TYPE"),
-			Path:      viper.GetString("STORAGE_PATH"),
-			Endpoint:  viper.GetString("S3_ENDPOINT"),
-			Bucket:    viper.GetString("S3_BUCKET"),
-			AccessKey: viper.GetString("S3_ACCESS_KEY"),
-			SecretKey: viper.GetString("S3_SECRET_KEY"),
+			Type:      v.GetString("STORAGE_TYPE"),
+			Path:      v.GetString("STORAGE_PATH"),
+			Endpoint:  v.GetString("S3_ENDPOINT"),
+			Bucket:    v.GetString("S3_BUCKET"),
+			AccessKey: v.GetString("S3_ACCESS_KEY"),
+			SecretKey: v.GetString("S3_SECRET_KEY"),
 		},
 		LLM: LLMConfig{
-			Provider: viper.GetString("LLM_PROVIDER"),
-			APIKey:   viper.GetString("LLM_API_KEY"),
-			BaseURL:  viper.GetString("LLM_BASE_URL"),
-			Model:    viper.GetString("LLM_MODEL"),
-			Timeout:  viper.GetInt("LLM_TIMEOUT"),
+			Provider: v.GetString("LLM_PROVIDER"),
+			APIKey:   v.GetString("LLM_API_KEY"),
+			BaseURL:  v.GetString("LLM_BASE_URL"),
+			Model:    v.GetString("LLM_MODEL"),
+			Timeout:  v.GetInt("LLM_TIMEOUT"),
 		},
 		Parser: ParserConfig{
-			PDFParser:        viper.GetString("PDF_PARSER"),
-			PythonServiceURL: viper.GetString("PYTHON_SERVICE_URL"),
+			PDFParser:        v.GetString("PDF_PARSER"),
+			PythonServiceURL: v.GetString("PYTHON_SERVICE_URL"),
 		},
 		Security: SecurityConfig{
-			JWTSecret:         viper.GetString("JWT_SECRET"),
-			DataRetentionDays: viper.GetInt("DATA_RETENTION_DAYS"),
+			JWTSecret:         v.GetString("JWT_SECRET"),
+			DataRetentionDays: v.GetInt("DATA_RETENTION_DAYS"),
 		},
 		Log: LogConfig{
-			Level:  viper.GetString("LOG_LEVEL"),
-			Format: viper.GetString("LOG_FORMAT"),
+			Level:  v.GetString("LOG_LEVEL"),
+			Format: v.GetString("LOG_FORMAT"),
 		},
 		Worker: WorkerConfig{
-			Concurrency: viper.GetInt("WORKER_CONCURRENCY"),
+			Concurrency: v.GetInt("WORKER_CONCURRENCY"),
 		},
 	}
 
-	// 设置默认值
+	applyDefaults(cfg)
+
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
+}
+
+func applyDefaults(cfg *Config) {
+	if cfg.AppEnv == "" {
+		cfg.AppEnv = "dev"
+	}
+
 	if cfg.Server.Port == 0 {
 		cfg.Server.Port = 8080
+	}
+	if cfg.Server.Mode == "" {
+		if cfg.AppEnv == "prod" {
+			cfg.Server.Mode = "release"
+		} else {
+			cfg.Server.Mode = "debug"
+		}
+	}
+	if cfg.Database.SSLMode == "" {
+		cfg.Database.SSLMode = "disable"
+	}
+	if cfg.Storage.Type == "" {
+		cfg.Storage.Type = "local"
+	}
+	if cfg.Storage.Path == "" {
+		cfg.Storage.Path = "./storage"
+	}
+	if cfg.LLM.Timeout == 0 {
+		cfg.LLM.Timeout = 120
+	}
+	if cfg.Parser.PDFParser == "" {
+		cfg.Parser.PDFParser = "pdftotext"
+	}
+	if cfg.Security.DataRetentionDays == 0 {
+		cfg.Security.DataRetentionDays = 30
 	}
 	if cfg.Worker.Concurrency == 0 {
 		cfg.Worker.Concurrency = 5
@@ -147,6 +220,113 @@ func Load() (*Config, error) {
 	if cfg.Log.Format == "" {
 		cfg.Log.Format = "json"
 	}
+}
 
-	return cfg, nil
+func (c *Config) Validate() error {
+	var missing []string
+
+	validateRequired(&missing, c.Database.Host, "DB_HOST")
+	validateRequiredInt(&missing, c.Database.Port, "DB_PORT")
+	validateRequired(&missing, c.Database.User, "DB_USER")
+	validateRequired(&missing, c.Database.DBName, "DB_NAME")
+	validateRequired(&missing, c.Redis.Host, "REDIS_HOST")
+	validateRequiredInt(&missing, c.Redis.Port, "REDIS_PORT")
+	validateRequired(&missing, c.Security.JWTSecret, "JWT_SECRET")
+	validateRequiredInt(&missing, c.Security.DataRetentionDays, "DATA_RETENTION_DAYS")
+	validateRequired(&missing, c.LLM.Provider, "LLM_PROVIDER")
+	validateRequired(&missing, c.LLM.APIKey, "LLM_API_KEY")
+	validateRequired(&missing, c.LLM.BaseURL, "LLM_BASE_URL")
+	validateRequired(&missing, c.LLM.Model, "LLM_MODEL")
+	validateRequiredInt(&missing, c.LLM.Timeout, "LLM_TIMEOUT")
+	validateRequired(&missing, c.Parser.PDFParser, "PDF_PARSER")
+	validateRequiredInt(&missing, c.Server.Port, "API_PORT")
+	validateRequiredInt(&missing, c.Worker.Concurrency, "WORKER_CONCURRENCY")
+
+	switch c.Storage.Type {
+	case "local":
+		validateRequired(&missing, c.Storage.Path, "STORAGE_PATH")
+	case "s3":
+		validateRequired(&missing, c.Storage.Endpoint, "S3_ENDPOINT")
+		validateRequired(&missing, c.Storage.Bucket, "S3_BUCKET")
+		validateRequired(&missing, c.Storage.AccessKey, "S3_ACCESS_KEY")
+		validateRequired(&missing, c.Storage.SecretKey, "S3_SECRET_KEY")
+	default:
+		return fmt.Errorf("invalid STORAGE_TYPE: %s (allowed: local, s3)", c.Storage.Type)
+	}
+
+	switch c.Parser.PDFParser {
+	case "pdftotext":
+	case "python-service":
+		validateRequired(&missing, c.Parser.PythonServiceURL, "PYTHON_SERVICE_URL")
+	default:
+		return fmt.Errorf("invalid PDF_PARSER: %s (allowed: pdftotext, python-service)", c.Parser.PDFParser)
+	}
+
+	switch c.AppEnv {
+	case "dev", "test", "prod":
+	default:
+		return fmt.Errorf("invalid APP_ENV: %s (allowed: dev, test, prod)", c.AppEnv)
+	}
+
+	if len(missing) > 0 {
+		return fmt.Errorf("missing required config: %s", strings.Join(missing, ", "))
+	}
+
+	return nil
+}
+
+func validateRequired(missing *[]string, value, key string) {
+	if strings.TrimSpace(value) == "" {
+		*missing = append(*missing, key)
+	}
+}
+
+func validateRequiredInt(missing *[]string, value int, key string) {
+	if value <= 0 {
+		*missing = append(*missing, key)
+	}
+}
+
+func detectAppEnv() string {
+	appEnv := strings.ToLower(strings.TrimSpace(os.Getenv("APP_ENV")))
+	if appEnv == "" {
+		return "dev"
+	}
+	return appEnv
+}
+
+func resolveConfigFile(appEnv string) (string, error) {
+	if envFile := strings.TrimSpace(os.Getenv("ENV_FILE")); envFile != "" {
+		if exists(envFile) {
+			absPath, err := filepath.Abs(envFile)
+			if err != nil {
+				return "", fmt.Errorf("failed to resolve config path %s: %w", envFile, err)
+			}
+			return absPath, nil
+		}
+		return "", fmt.Errorf("ENV_FILE not found: %s", envFile)
+	}
+
+	candidates := []string{
+		fmt.Sprintf(".env.%s.local", appEnv),
+		fmt.Sprintf(".env.%s", appEnv),
+		".env",
+	}
+
+	for _, candidate := range candidates {
+		if exists(candidate) {
+			absPath, err := filepath.Abs(candidate)
+			if err != nil {
+				return "", fmt.Errorf("failed to resolve config path %s: %w", candidate, err)
+			}
+			return absPath, nil
+		}
+	}
+
+	return "", errors.New("no config file found. expected one of: .env.<env>.local, .env.<env>, .env")
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }

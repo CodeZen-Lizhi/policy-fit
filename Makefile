@@ -1,4 +1,4 @@
-.PHONY: help build run-api run-worker test lint clean migrate-up migrate-down docker-up docker-down
+.PHONY: help build run-api run-worker test lint clean migrate-up migrate-down docker-up docker-down env-check
 
 help: ## 显示帮助信息
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -55,5 +55,10 @@ deps: ## 安装依赖
 	@echo "Installing dependencies..."
 	@go mod download
 	@go mod tidy
+
+env-check: ## 校验当前环境配置
+	@echo "Validating environment configuration..."
+	@go run cmd/envcheck/main.go
+	@echo "Environment configuration is valid."
 
 .DEFAULT_GOAL := help
